@@ -1,2 +1,5 @@
+ipython[all]
 numpy
 matplotlib
+seaborn
+pytest
