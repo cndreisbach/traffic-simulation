@@ -5,8 +5,8 @@ Car = namedtuple("Car", ["location",
                          "speed",
                          "max_speed",
                          "acceleration",
-                         "minimum_spacing",
-                         "braking_prob"])
+                         "braking_prob",
+                         "road_length"])
 
 
 class CrashError(RuntimeError):
@@ -30,16 +30,16 @@ def check_braking(car, prob=None):
         return car
 
 
-def move(car, road_length):
-    next_loc = (car.location + car.speed) % road_length
+def move(car):
+    next_loc = (car.location + car.speed) % car.road_length
     return car._replace(location=next_loc)
 
 
-def distance(car, next_car, road_length):
+def distance(car, next_car):
     car_loc = car.location
     next_car_loc = next_car.location
     if car_loc > next_car_loc and car_loc - next_car_loc > car.speed:
-        next_car_loc += road_length
+        next_car_loc += car.road_length
     return next_car_loc - car_loc
 
 
@@ -48,8 +48,8 @@ def desired_distance(car):
     return car.speed + 5
 
 
-def too_close(car, next_car, road_length):
-    dist = distance(car, next_car, road_length)
+def too_close(car, next_car):
+    dist = distance(car, next_car)
 
     if dist < 0:
         raise CrashError("Car at {} crashed into car at {}".format(car.location, next_car.location))
@@ -57,9 +57,9 @@ def too_close(car, next_car, road_length):
     return dist < desired_distance(car)
 
 
-def adjust_speed(car, next_car, road_length):
-    if too_close(car, next_car, road_length):
-        new_speed = min(distance(car, next_car, road_length), car.speed, next_car.speed)  # - car.acceleration
+def adjust_speed(car, next_car):
+    if too_close(car, next_car):
+        new_speed = min(distance(car, next_car), car.speed, next_car.speed)  # - car.acceleration
         new_speed = max(0, new_speed)
         return car._replace(speed=new_speed)
 
